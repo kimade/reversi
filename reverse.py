@@ -24,7 +24,8 @@ class reverse:
         self.print_board()
         print("入力は以下のようにしてください")
         print("例：3 4　(3行4列におきたいとき)")
-        self.turn = "○"  # 先攻:○, 後攻:●として管理
+        self.turn = "●"  # 先攻:○, 後攻:●として管理
+        self.g_flag = False  # 決着用のフラグ
 
     def put_stone(self):
         print()
@@ -125,7 +126,7 @@ class reverse:
                     self.board_copy[c_v, r_v] = self.turn  # 指定の場所に石を置く
                 for i in range(c_v + 1, len(self.column)):  # 一番下まで確認して
                     if self.board[i, r_v] == "×":
-                        self.board_copy = self.board
+                        self.board_copy = self.board.copy()
                         break
                     if self.board[i, r_v] != self.turn:
                         if rvs:
@@ -136,6 +137,11 @@ class reverse:
                         under = True
                         break
 
+            if under == False:  # ひっくり返せない時
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
+
             # 上の確認
             top = False
             if (self.board[c_v - 1, r_v] != self.turn) and (self.board[c_v - 1, r_v] != "×"):  # 上が自分と違う色だった場合
@@ -143,7 +149,7 @@ class reverse:
                     self.board_copy[c_v, r_v] = self.turn  # 指定の場所に石を置く
                 for i in range(c_v - 1, -1, -1):  # 一番上まで確認して
                     if self.board[i, r_v] == "×":
-                        self.board_copy = self.board
+                        self.board_copy = self.board.copy()
                         break
                     if self.board[i, r_v] != self.turn:
                         if rvs:
@@ -214,7 +220,7 @@ class reverse:
                     self.board_copy[c_s, r_s] = self.turn  # 指定の場所に石を置く
                 for i in range(r_s + 1, len(self.row)):  # 一番右まで確認して
                     if self.board[c_s, i] == "×":
-                        self.board_copy = self.board
+                        self.board_copy = self.board.copy()
                         break
                     if self.board[c_s, i] != self.turn:
                         if rvs:
@@ -224,6 +230,10 @@ class reverse:
                     elif self.board[c_s, i] == self.turn:  # 同じ色があったらひっくり返せるのでflag=Trueに
                         right = True
                         break
+            if right == False:  # ひっくり返せない時
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
             # 左の確認
             left = False
             if (self.board[c_s, r_s - 1] != self.turn) and (self.board[c_s, r_s - 1] != "×"):  # 左が自分と違う色だった場合
@@ -231,7 +241,7 @@ class reverse:
                     self.board_copy[c_s, r_s] = self.turn  # 指定の場所に石を置く
                 for i in range(r_s - 1, -1, -1):  # 一番左まで確認して
                     if self.board[c_s, i] == "×":
-                        self.board_copy = self.board
+                        self.board_copy = self.board.copy()
                         break
                     if self.board[c_s, i] != self.turn:
                         if rvs:
@@ -256,12 +266,14 @@ class reverse:
             if r_d == 0:  # 左上の角
                 if (self.board[c_d + 1, r_d + 1] == self.turn) or (self.board[c_d + 1, r_d + 1] == "×"):
                     return False
+                if rvs:
+                    self.board_copy[c_d, r_d] = self.turn
                 for i in range(1, len(self.column)):
                     if (self.board[i, i] == "×"):
                         break
                     if (self.board[i, i] != self.turn):
                         if rvs:
-                            self.board[i, i] = self.turn
+                            self.board_copy[i, i] = self.turn
                         else:
                             continue
                     elif self.board[i, i] == self.turn:
@@ -272,50 +284,56 @@ class reverse:
             elif r_d == 7:  # 右上の角
                 if (self.board[c_d + 1, r_d - 1] == self.turn) or (self.board[c_d + 1, r_d - 1] == "×"):
                     return False
+                if rvs:
+                    self.board_copy[c_d, r_d] = self.turn
                 for i in range(1, len(self.column)):
                     if (self.board[i, 7 - i] == "×"):
                         break
                     if (self.board[i, 7 - i] != self.turn):
                         if rvs:
-                            self.board[i, 7 - i] = self.turn
+                            self.board_copy[i, 7 - i] = self.turn
                         else:
                             continue
                     elif self.board[i, 7 - i] == self.turn:
                         return True
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
                 return False
 
         elif c_d == 7:
             if r_d == 0:  # 左下の角
                 if (self.board[c_d - 1, r_d + 1] == self.turn) or (self.board[c_d - 1, r_d + 1] == "×"):
                     return False
+                if rvs:
+                    self.board_copy[c_d, r_d] = self.turn
                 for i in range(1, len(self.column)):
                     if (self.board[7 - i, i] == "×"):
                         break
                     if (self.board[7 - i, i] == self.turn):
                         if rvs:
-                            self.board[7 - i, i] = self.turn
+                            self.board_copy[7 - i, i] = self.turn
                         else:
                             continue
                     elif self.board[7 - i, i] == self.turn:
                         return True
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
                 return False
 
             elif r_d == 7:  # 右下の角
                 if (self.board[c_d - 1, r_d - 1] == self.turn) or (self.board[c_d - 1, r_d - 1] == "×"):
                     return False
+                if rvs:
+                    self.board_copy[c_d, r_d] = self.turn
                 for i in range(1, len(self.column)):
                     if (self.board[7 - i, 7 - i] == "×"):
                         break
                     if (self.board[7 - i, 7 - i] != self.turn):
                         if rvs:
-                            self.board[7 - i, 7 - i] = self.turn
+                            self.board_copy[7 - i, 7 - i] = self.turn
                         else:
                             continue
                     elif self.board[7 - i, 7 - i] == self.turn:
                         return True
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
                 return False
 
         # TODO:端のひっくり返し方の実装
@@ -343,7 +361,9 @@ class reverse:
                 except:
                     break
             if down_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 右斜め下
             down_r = False
@@ -364,7 +384,9 @@ class reverse:
                 except:
                     break
             if down_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             if down_l or down_r:
                 return True
@@ -395,7 +417,9 @@ class reverse:
                 except:
                     break
             if up_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 右斜め上
             up_r = False
@@ -416,7 +440,9 @@ class reverse:
                 except:
                     break
             if up_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             if up_l or up_r:
                 return True
@@ -447,7 +473,9 @@ class reverse:
                 except:
                     break
             if up_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 右斜め下
             down_r = False
@@ -468,7 +496,9 @@ class reverse:
                 except:
                     break
             if down_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             if up_r or down_r:
                 return True
@@ -501,7 +531,9 @@ class reverse:
                 except:
                     break
             if up_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 左斜め下
             down_l = False
@@ -522,7 +554,9 @@ class reverse:
                 except:
                     break
             if down_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             if up_l or down_l:
                 return True
@@ -557,7 +591,9 @@ class reverse:
                 except:
                     break
             if up_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 左斜め下
             down_l = False
@@ -578,7 +614,9 @@ class reverse:
                 except:
                     break
             if down_l == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 右斜め上
             up_r = False
@@ -599,7 +637,9 @@ class reverse:
                 except:
                     break
             if up_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
             # 右斜め下
             down_r = False
@@ -620,9 +660,11 @@ class reverse:
                 except:
                     break
             if down_r == False:  # ひっくり返せない時
-                self.board_copy = self.board
+                self.board_copy = self.board.copy()
+            else:
+                self.board = self.board_copy.copy()  # 盤面に同期
 
-            if (up_r) or (down_r) or (up_l) or (up_r):
+            if ((up_r) or (down_r) or (up_l) or (down_l)):
                 return True
             else:
                 return False
@@ -635,19 +677,36 @@ class reverse:
                 A = self.check_vertical(i + 1, j + 1, rvs=False)
                 B = self.check_side(i + 1, j + 1, rvs=False)
                 C = self.check_diagonal(i + 1, j + 1, rvs=False)
-                if (A or B or C):  # どこかひとつでも置けるのであればまだ終局でないのでreturnする
+                if A or B or C:  # どこかひとつでも置けるのであればまだ終局でないのでreturnする
+                    self.g_flag = False
                     return  # まだ続ける
-        self.count_stone()  # どこにも置けないのであればFalseを返して対局を終了する
-        sys.exit()
+        # おくところがない時
+        if self.g_flag:
+            print("両者ともにおくところがありません。")
+            self.count_stone()
+            sys.exit()
+        else:
+            self.g_flag = True
+            if self.turn == "○":
+                print("どこにも置けないので{}の番はスキップします。".format(self.former))
+                self.turn = "●"
+                self.judge()
+
+            else:
+                print("どこにも置けないので{}の番はスキップします。".format(self.later))
+                self.turn = "○"
+                self.judge()
+            return
+
 
     def count_stone(self):  # 石の数を数えて勝敗を決める関数
         cnt_black = 0
         cnt_white = 0
         for i in range(len(self.column)):
             for j in range(len(self.row)):
-                if self.board[i, j] == "●":
+                if self.board[i, j] == "○":
                     cnt_black += 1
-                elif self.board[i, j] == "○":
+                elif self.board[i, j] == "●":
                     cnt_white += 1
         print("対局終了")
         if cnt_black > cnt_white:
@@ -664,6 +723,6 @@ class reverse:
 
     def play(self):  # 試合を実行する関数
         while 1:
+            self.judge()
             self.put_stone()
             self.print_board()
-            self.judge()
